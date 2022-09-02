@@ -1519,7 +1519,7 @@ def plotCompareMeshGroupValues(mesh_df, n_col=3, hue=None, log_value=None,
     return g, mesh_df
 
 def plotGeographicDistributionbyState(locations_df, average="mean", values="EnrollmentAvg", title="Number of clinical trial locations by state", 
-                                      log_value=None, scale_label="Count", return_df=False, figsize=(700,550)):
+                                      log_value=None, scale_label="Count", return_df=False, figsize=(600,450)):
     """
     Plot geographic distribution of trial lovations by state_code, obtained using mapTrialLocations()
     Also requires a values column, if no value column is provided, defaults to 1 per trial location
@@ -1567,7 +1567,7 @@ def plotGeographicDistributionbyState(locations_df, average="mean", values="Enro
     
     return fig
 
-def plotPerPopulationTrial(values, state_code_dict, normalize=10e4, figsize=(700,550),title="Clinical trial locations per 100k population",
+def plotPerPopulationTrial(values, state_code_dict, normalize=10e4, figsize=(600,450),title="Clinical trial locations per 100k population",
                            state_pop_file="./dataInput/censusPopulation.csv", label="count/100k"):
     """
     https://www.census.gov/data/tables/time-series/demo/popest/2020s-state-total.html

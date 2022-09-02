@@ -62,7 +62,7 @@ def plotDatasetOverview():
 
 def plotSponsorsAndLocations():
     # create containers
-    col1, buffer, col2 = st.columns([3, 1, 9])
+    col1, buffer, col2 = st.columns([2, 3, 6])
 
     # load data
     plots_df = st.session_state.plot_values
@@ -71,7 +71,7 @@ def plotSponsorsAndLocations():
     with col1:
         ## Figure 2B: Sponsor type
         fig = plotSponsorCollaborations(plots_df[["NCTId", "LeadSponsorClass", "PrimaryCollaboratorClass"]],
-                                  collab_col="PrimaryCollaboratorClass", explode_collaborators=False, height=550, width=375)
+                                  collab_col="PrimaryCollaboratorClass", explode_collaborators=False, height=450, width=325)
         st.plotly_chart(fig)
 
     with col2:
@@ -200,7 +200,7 @@ def _loadSessionStateFilterElements(plots_df):
     # update plot_values
     st.session_state.plot_values = plots_df
 
-@st.experimental_singleton
+# @st.experimental_singleton
 def loadGlobalObjects():
     """
     Load session state values
