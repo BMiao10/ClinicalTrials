@@ -13,3 +13,4 @@ umap-learn==0.5.3
 bertopic==0.11.0
 pgeocode==0.3.0
 scispacy==0.5.0
+https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.0/en_core_sci_lg-0.5.0.tar.gz

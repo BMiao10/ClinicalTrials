@@ -7,3 +7,4 @@ slides/
 dataInput/desc2022.xml
 __pycache__/
 **/.DS_Store
+dataInput/en_core_sci_sm-0.5.0/
