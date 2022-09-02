@@ -1334,13 +1334,13 @@ def getUserQuery(queries, fields_list, search_fields):
 
     # TODO: also save a copy to disk 
 
-def getSpacyNLP(linker="mesh"):
+def getSpacyNLP(model="en_core_sci_lg", linker="mesh"):
     """
     Load (sci)spacy pipeline
     """
     # TODO: figure out how to cache the scispacy linker so it doesn't keep pulling from the website
     #en_core_sci_sm #en_ner_bc5cdr_md (contains disease/chemical entities) #python -m spacy download en_core_web_md
-    nlp = spacy.load("en_core_sci_lg", disable=['textcat', 'parser'])  
+    nlp = spacy.load(model, disable=['textcat', 'parser'])  
     nlp.add_pipe("scispacy_linker", config={"resolve_abbreviations": True, "linker_name": linker, "max_entities_per_mention":1})
     nlp.max_length = 1000000
     
