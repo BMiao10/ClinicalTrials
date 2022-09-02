@@ -71,7 +71,7 @@ def plotSponsorsAndLocations():
     with col1:
         ## Figure 2B: Sponsor type
         fig = plotSponsorCollaborations(plots_df[["NCTId", "LeadSponsorClass", "PrimaryCollaboratorClass"]],
-                                  collab_col="PrimaryCollaboratorClass", explode_collaborators=False, height=650, width=475)
+                                  collab_col="PrimaryCollaboratorClass", explode_collaborators=False, height=550, width=375)
         st.plotly_chart(fig)
 
     with col2:
@@ -206,7 +206,7 @@ def loadGlobalObjects():
     Load session state values
 
     """
-    spacy_nlp = getSpacyNLP()
+    spacy_nlp = getSpacyNLP(model="en_core_sci_sm") #"./dataInput/en_core_sci_sm-0.5.0")
     st.session_state.nlp = spacy_nlp
 
     all_stopwords = spacy_nlp.Defaults.stop_words
