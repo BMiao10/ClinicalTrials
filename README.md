@@ -6,3 +6,5 @@ Our interactive dashboard can be found here:
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_white_red.svg)](https://bmiao10-clinicaltrials-clinicaltrialsstreamlit-xive42.streamlitapp.com/)
 
 Due to size limitationas, the dashboard currently uses the "en_core_sci_sm" from [SciSpacy](https://allenai.github.io/scispacy/). Other SciSpacy models can be used if run locally. 
+
+Last updated: September 2, 2022
