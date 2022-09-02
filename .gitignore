@@ -1,0 +1,9 @@
+dataInput/AllAPIJSON/
+dataInput/State_ADI_Data/
+dataOutput/figures/
+manuscriptFigures.afdesign
+archive.ipynb
+slides/
+dataInput/desc2022.xml
+__pycache__/
+**/.DS_Store
