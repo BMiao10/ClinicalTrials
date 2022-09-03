@@ -62,7 +62,7 @@ def plotDatasetOverview():
 
 def plotSponsorsAndLocations():
     # create containers
-    col1, buffer, col2 = st.columns([2, 3, 6])
+    col1, buffer, col2 = st.columns([2, 2, 4])
 
     # load data
     plots_df = st.session_state.plot_values
@@ -145,6 +145,8 @@ def plotEligibilityCriteria():
 
         all_stopwords = st.session_state.stopwords
         _nlp = st.session_state.nlp
+        # TODO: load custom embeddings
+        # Merge to clinical_df
         bert_df = extractIndividualEligibility(clinical_df, criteria_col="%sCriteria"%criteria, stopwords=all_stopwords)
         model, bert_df = extractBERTopics(bert_df, _nlp, criteria_col="%sCriteriaEmbedClean"%criteria,
                                           seed=0, nr_topics='auto')
@@ -206,15 +208,18 @@ def loadGlobalObjects():
     Load session state values
 
     """
-    spacy_nlp = getSpacyNLP(model="en_core_sci_sm") #"./dataInput/en_core_sci_sm-0.5.0")
+    spacy_nlp = getSpacyNLP(model="en_core_sci_lg") #en_core_sci_sm "./dataInput/en_core_sci_sm-0.5.0")
     st.session_state.nlp = spacy_nlp
 
     all_stopwords = spacy_nlp.Defaults.stop_words
     all_stopwords |= {"patient", "subject", "participant", "studies", "study", "individual", "e.g.",  "diagnosis", "participation", "participate"} 
     st.session_state.stopwords = all_stopwords
+
+    # TODO: manually load spacy_nlp stop words from en_core_sci_lg
+    # all_stopwords = {}
     
-    mesh_dict = meshIDToBranchDict()
-    st.session_state.mesh_dict = mesh_dict
+    #mesh_dict = meshIDToBranchDict()
+    #st.session_state.mesh_dict = mesh_dict
     
 
 def loadUserQueryDashboard():

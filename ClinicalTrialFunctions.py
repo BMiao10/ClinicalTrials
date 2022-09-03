@@ -42,6 +42,8 @@ from statannot import add_stat_annotation
 import plotly.express as px
 import plotly.graph_objects as go
 
+# manuscript only
+
 ######################################################
 ### DTx manuscript functions
 
@@ -670,7 +672,7 @@ def extractIndividualEligibility(bert_df, criteria_col="ExclusionCriteria", stop
     return bert_df
 
 #@st.experimental_singleton
-def extractBERTopics(bert_df, _nlp, seed=None, nr_topics='auto',
+def extractBERTopics(bert_df, _nlp=None, seed=None, nr_topics='auto', embeddings=None,
                       criteria_col = "ExclusionCriteriaEmbedClean", class_col='conditionMeshMainBranch'):
     """
     Get topics using BERTopic run on spacy embeddings 
@@ -682,6 +684,7 @@ def extractBERTopics(bert_df, _nlp, seed=None, nr_topics='auto',
         stopwords (list): list of stopwords to remove
         criteria_col (str): criteria column in criteria_df
         class_col (str): column containing groups to plot top topics for
+        embeddings (np.ndarray): custom embeddings, supersedes nlp model
         nr_topics (str, int): number of topics for BERTopic to select, use 'auto' for DBSCAN auto selection
         
     """
@@ -690,7 +693,8 @@ def extractBERTopics(bert_df, _nlp, seed=None, nr_topics='auto',
         
     # get docs and embeddings
     docs = bert_df[criteria_col]
-    embeddings = np.asarray([_nlp(c).vector for c in docs])
+    if embeddings is None:
+        embeddings = np.asarray([_nlp(c).vector for c in docs])
     
     # Train our topic model using our pre-trained sentence-transformers embeddings
     model = BERTopic(nr_topics=nr_topics, umap_model=umap_model).fit(docs, embeddings)
