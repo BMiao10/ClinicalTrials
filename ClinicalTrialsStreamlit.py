@@ -208,7 +208,7 @@ def loadGlobalObjects():
     Load session state values
 
     """
-    spacy_nlp = getSpacyNLP(model="en_core_sci_lg") #en_core_sci_sm "./dataInput/en_core_sci_sm-0.5.0")
+    spacy_nlp = getSpacyNLP(model="en_core_sci_sm") #en_core_sci_lg "./dataInput/en_core_sci_sm-0.5.0")
     st.session_state.nlp = spacy_nlp
 
     all_stopwords = spacy_nlp.Defaults.stop_words
