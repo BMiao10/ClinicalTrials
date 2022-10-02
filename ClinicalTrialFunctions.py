@@ -673,7 +673,8 @@ def extractIndividualEligibility(bert_df, criteria_col="ExclusionCriteria", stop
 
 #@st.experimental_singleton
 def extractBERTopics(bert_df, _nlp=None, seed=None, nr_topics='auto', embeddings=None,
-                      criteria_col = "ExclusionCriteriaEmbedClean", class_col='conditionMeshMainBranch'):
+                     cache_embeddings=None, criteria_col = "ExclusionCriteriaEmbedClean", 
+                     class_col='conditionMeshMainBranch'):
     """
     Get topics using BERTopic run on spacy embeddings 
     https://arxiv.org/abs/2203.05794
@@ -683,6 +684,7 @@ def extractBERTopics(bert_df, _nlp=None, seed=None, nr_topics='auto', embeddings
         _nlp (None, spacy model): spacy model for embedding, ignored if custom embeddings are passed 
         stopwords (list): list of stopwords to remove
         criteria_col (str): criteria column in criteria_df
+        cache_embeddings (str, pathlike): folder to save embeddings to for easier loading, should be in form "path/folder/"
         class_col (str): column containing groups to plot top topics for
         embeddings (np.ndarray): custom embeddings, supersedes nlp model
         nr_topics (str, int): number of topics for BERTopic to select, use 'auto' for DBSCAN auto selection
@@ -695,7 +697,9 @@ def extractBERTopics(bert_df, _nlp=None, seed=None, nr_topics='auto', embeddings
     docs = bert_df[criteria_col]
     if embeddings is None:
         embeddings = np.asarray([_nlp(c).vector for c in docs])
-    
+        if cache_embeddings is not None: 
+            embeddings.save(cache_embeddings+criteria_col+".npy")
+        
     # Train our topic model using our pre-trained sentence-transformers embeddings
     model = BERTopic(nr_topics=nr_topics, umap_model=umap_model).fit(docs, embeddings)
     bert_df["Topics"], bert_df["TopicProbs"] = model.transform(docs, embeddings, )

@@ -4,7 +4,9 @@ dataOutput/figures/
 manuscriptFigures.afdesign
 archive.ipynb
 slides/
+authorforms/
 dataInput/desc2022.xml
 __pycache__/
 **/.DS_Store
 dataInput
+manuscript/
