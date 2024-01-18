@@ -62,7 +62,7 @@ def plotDatasetOverview():
 
 def plotSponsorsAndLocations():
     # create containers
-    col1, buffer, col2 = st.columns([2, 2, 4])
+    col1, buffer, col2 = st.columns([4, 3, 11])
 
     # load data
     plots_df = st.session_state.plot_values
@@ -71,23 +71,31 @@ def plotSponsorsAndLocations():
     with col1:
         ## Figure 2B: Sponsor type
         fig = plotSponsorCollaborations(plots_df[["NCTId", "LeadSponsorClass", "PrimaryCollaboratorClass"]],
-                                  collab_col="PrimaryCollaboratorClass", explode_collaborators=False, height=450, width=325)
+                                  collab_col="PrimaryCollaboratorClass", explode_collaborators=False,
+                                  height=450, width=325, link_color_alpha=0.7)
+        fig.update_layout(paper_bgcolor='black')
         st.plotly_chart(fig)
 
     with col2:
         normalize = st.checkbox("Normalize to state population")
+        figsize=(550,400)
         
         if normalize:
             locations_df = plots_df.explode(["LocationState"])
-
+            
             state_code_dict = {}
             for m, n in zip(plots_df["LocationState"], plots_df["state_code"]):
                 if m is not None and n is not None and len(m) == len(n): state_code_dict.update(dict(zip(m,n)))
-            fig, state_df = plotPerPopulationTrial(locations_df.value_counts("LocationState"), state_code_dict, normalize=10e4)
+            
+            fig, state_df = plotPerPopulationTrial(locations_df.value_counts("LocationState"), 
+                                                    state_code_dict, figsize=figsize,
+                                                    normalize=10e4)
             st.plotly_chart(fig)
         else:
             ## Figure 2A: Locations by state
-            fig = plotGeographicDistributionbyState(plots_df[["NCTId", "state_code"]], values=None, average="sum", log_value=None)
+            fig = plotGeographicDistributionbyState(plots_df[["NCTId", "state_code"]], 
+                values=None, average="sum", log_value=None, figsize=figsize)
+            
             st.plotly_chart(fig)
 
 def plotMeshBranchValues():
@@ -103,20 +111,26 @@ def plotMeshBranchValues():
     ## Figure 3A: Mesh branch counts (at least 10 in group)
     with col1: 
         min_count = st.number_input("Min trial count", min_value=1, value=10)
-        ax = plotMeshBranchCounts(plots_df[["conditionMeshMainBranch"]], min_count=min_count)
-        st.pyplot(ax)
+        try:
+            ax = plotMeshBranchCounts(plots_df[["conditionMeshMainBranch"]], min_count=min_count)
+            st.pyplot(ax)
+        except:
+            st.write("Not enough values to plot")
 
     ## Figure 3B: Actual vs anticipated enrollment by MeSH branch
     with col2: 
         ## Statistics for actual vs anticipated values
-        stats_df = mannWhitneyLongDf(plots_df, values_col="EnrollmentCount", min_values=min_count,
+        try:
+            stats_df = mannWhitneyLongDf(plots_df, values_col="EnrollmentCount", min_values=min_count,
                       labels_col="EnrollmentType",subset_col="conditionMeshMainBranch")
-        st.write(stats_df)
+            st.write(stats_df)
 
-        g, condition_df = plotCompareMeshGroupValues(plots_df[["EnrollmentCount", "conditionMeshMainBranch", "EnrollmentType"]], 
-            n_col=3, counts_col="EnrollmentCount", x_col="EnrollmentType",  mesh_col="conditionMeshMainBranch", min_len=min_count)
+            g, condition_df = plotCompareMeshGroupValues(plots_df[["EnrollmentCount", "conditionMeshMainBranch", "EnrollmentType"]], 
+                n_col=3, counts_col="EnrollmentCount", x_col="EnrollmentType",  mesh_col="conditionMeshMainBranch", min_len=min_count)
+            st.pyplot(g)
 
-        st.pyplot(g)
+        except:
+            st.write("Not enough values to plot")
 
 def plotEligibilityCriteria():
     """
@@ -132,24 +146,24 @@ def plotEligibilityCriteria():
         st.write("Click run to load topics")
         run_button = st.button("Run")
 
+    clinical_df = st.session_state.plot_values
+    all_stopwords = st.session_state.stopwords
+    _nlp = st.session_state.nlp
+
     if run_button:
-        st.write("Please be patient! This takes a minute to run")
+        st.write("Please be patient! This can take a minute to run")
 
         # Get values
-        clinical_df = st.session_state.plot_values
         mesh_ind = clinical_df["conditionMeshMainBranch"].value_counts().loc[lambda x: x>num_min].index
         clinical_df = clinical_df[clinical_df["conditionMeshMainBranch"].isin(mesh_ind)]
 
         ## Figure 4A/B: Eligibility criteria topics by MeSH group
         topics = [0,1,2,3,4]
 
-        all_stopwords = st.session_state.stopwords
-        _nlp = st.session_state.nlp
-
         # Merge to clinical_df
         bert_df = extractIndividualEligibility(clinical_df, criteria_col="%sCriteria"%criteria, stopwords=all_stopwords)
         model, bert_df = extractBERTopics(bert_df, _nlp, criteria_col="%sCriteriaEmbedClean"%criteria,
-                                          seed=0, nr_topics='auto')
+            seed=0, nr_topics='auto')
 
         clinical_df["%sTopics"%criteria] = clinical_df["NCTId"].map(dict(bert_df.groupby("NCTId")["Topics"].apply(set)))
         clinical_df["%sTopicNames"%criteria] = [[model.topic_names[i] for i in t] for t in clinical_df["%sTopics"%criteria]]
@@ -202,22 +216,23 @@ def _loadSessionStateFilterElements(plots_df):
     # update plot_values
     st.session_state.plot_values = plots_df
 
-# @st.experimental_singleton
+@st.cache(show_spinner=False)
 def loadGlobalObjects():
     """
     Load session state values
 
     """
     spacy_nlp = getSpacyNLP(model="en_core_sci_sm") #en_core_sci_lg "./dataInput/en_core_sci_sm-0.5.0")
-    st.session_state.nlp = spacy_nlp
-
+    
     all_stopwords = spacy_nlp.Defaults.stop_words
     all_stopwords |= {"patient", "subject", "participant", "studies", "study", "individual", "e.g.",  "diagnosis", "participation", "participate"} 
-    st.session_state.stopwords = all_stopwords
     
+    st.session_state.nlp = spacy_nlp
+    st.session_state.stopwords = all_stopwords
+
     #mesh_dict = meshIDToBranchDict()
     #st.session_state.mesh_dict = mesh_dict
-    
+
 
 def loadUserQueryDashboard():
     """
@@ -252,7 +267,7 @@ def loadUserQueryDashboard():
         #full_query_df = _getUserQuery(queries, fields_list, search_fields)
         
         full_query_df = pd.read_parquet("./exampleFile/DTxClinicalTrials.parquet.gzip")
-
+        #st.write(full_query_df)
 
     else:
         uploaded_files = st.sidebar.file_uploader("Upload custom file", type=".gzip", accept_multiple_files=True)
@@ -262,10 +277,13 @@ def loadUserQueryDashboard():
                 curr_df = pd.read_parquet(file_name)
                 full_query_df = full_query_df.append(curr_df)
 
-    if len(full_query_df) > 0:
+    
+    st.session_state.trials = full_query_df
+
+    #if len(full_query_df) > 0:
         # clean and save to session state
-        full_query_df = cleanDataset(full_query_df) #, _nlp=spacy_nlp
-        st.session_state.trials = full_query_df
+        #full_query_df = cleanDataset(full_query_df) #, _nlp=spacy_nlp
+        #st.session_state.trials = full_query_df
 
 def plotDashboard():
     """
@@ -274,7 +292,7 @@ def plotDashboard():
     # load values for plotting
     clinical_df = st.session_state.trials
     _loadSessionStateFilterElements(clinical_df)
-    
+
     # Plot number and duration of interventional vs observational studies
     with st.expander("Dataset overview"): plotDatasetOverview()
 
@@ -297,7 +315,7 @@ def plotDashboard():
 
 ######################################################
 ### Main
-loadGlobalObjects()
+loadGlobalObjects()    
 loadUserQueryDashboard()
 if "trials" in st.session_state: plotDashboard()
 

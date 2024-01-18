@@ -667,7 +667,6 @@ def extractIndividualEligibility(bert_df, criteria_col="ExclusionCriteria", stop
     # lemma - the problem with this is it removes things like ios and is not great on the clinical text side
     # tried NLTK stemming as well, but that removed a lot more suffixes that it wasn't supposed to
     # bert_df["InclusionCriteriaEmbedClean"] = [" ".join([tok.lemma_ if len(tok.text)>3 else tok.text for tok in spacy_nlp(c)]) for c in bert_df["InclusionCriteriaEmbedClean"]]
-
     
     return bert_df
 
@@ -1436,11 +1435,14 @@ def plotCompletionYear(plots_df, colors, x_values="CompletionYear",xlabel="Compl
 
     """
     fig,ax = plt.subplots(figsize=figsize) 
-    ax = sns.histplot(data=plots_df, x=x_values, binwidth=1, hue="StudyType", multiple="stack",  palette=colors)
+    ax = sns.histplot(data=plots_df, x=x_values, discrete=True, hue="StudyType", multiple="stack",  palette=colors)
     ax.xaxis.get_major_locator().set_params(integer=True)
     ymin, ymax = ax.get_ylim()
-    ax.vlines(x=2022, ymin=ymin, ymax=ymax, ls='--', lw=2, color="gray")
+    ax.vlines(x=2022.5, ymin=ymin, ymax=ymax, ls='--', lw=2, color="gray")
     ax.set_xlabel(xlabel)
+    ax.set_xticks(plots_df[x_values].sort_values().unique())
+    ax.set_xticklabels(plots_df[x_values].sort_values().unique())
+    
     #if len(ax.containers)>1: ax.bar_label(ax.containers[1], color="steelblue")
     #ax.bar_label(ax.containers[0], color="orange")
     
@@ -1572,10 +1574,11 @@ def plotGeographicDistributionbyState(locations_df, average="mean", values="Enro
         width=figsize[0], 
         )
     fig.update_layout(title_text=title, font_size=14)
-    
+    fig.update_layout( margin=dict(l=10, r=10, t=50, b=10),)
     return fig
 
-def plotPerPopulationTrial(values, state_code_dict, normalize=10e4, figsize=(600,450),title="Clinical trial locations per 100k population",
+def plotPerPopulationTrial(values, state_code_dict, normalize=10e4, 
+                            figsize=(600,450),title="Clinical trial locations per 100k population",
                            state_pop_file="./dataInput/censusPopulation.csv", label="count/100k"):
     """
     https://www.census.gov/data/tables/time-series/demo/popest/2020s-state-total.html
@@ -1610,11 +1613,12 @@ def plotPerPopulationTrial(values, state_code_dict, normalize=10e4, figsize=(600
         width=figsize[0], 
         )
     fig.update_layout(title_text=title, font_size=14)
-
+    fig.update_layout( margin=dict(l=10, r=10, t=50, b=10),)
     return fig, state_df
 
 def plotSponsorCollaborations(plots_df, sponsor_col="LeadSponsorClass", collab_col="PrimaryCollaboratorClass", 
-                              explode_collaborators=False, height=650, width=475):
+                              explode_collaborators=False, height=650, width=475,
+                              link_color_alpha=0.2):
     """
     Plots Sankey diagram of primary sponsors and collaborator types
     Recommended that collaborator types are collapsed, or use explode_collaborators to see all collaborations
@@ -1628,7 +1632,6 @@ def plotSponsorCollaborations(plots_df, sponsor_col="LeadSponsorClass", collab_c
         None
     
     """
-   
     
     ### SPONSOR & COLLABORATOR TYPES
     # explode collabortors if multiple
@@ -1669,7 +1672,7 @@ def plotSponsorCollaborations(plots_df, sponsor_col="LeadSponsorClass", collab_c
     # color values
     colors = [colors_dict[l] for l in labels]
     plots_df["node_color"] = plots_df["source"].map(colors_dict)
-    plots_df["link_color"] = [c.replace("1)", "0.2)") for c in plots_df["node_color"]]
+    plots_df["link_color"] = [c.replace("1)", "%s)"%link_color_alpha) for c in plots_df["node_color"]]
 
     # y values for sponsors
     sponsors_dict = [l for l in labels if "Collab" not in l] # 
@@ -1721,7 +1724,7 @@ def plotSponsorCollaborations(plots_df, sponsor_col="LeadSponsorClass", collab_c
                                margin=go.layout.Margin(l=50,r=50, b=50, t=50, pad=5)),
     )
 
-    fig.update_layout(title_text="Primary Sponsors & Collaborator Types",  font_size=14, )
+    fig.update_layout(title_text="Primary Sponsor & Collaborator Types",  font_size=13, )
     
     # update names
     new_labels = [t.split("-")[0] if "-" in t else t for t in fig.data[0]["node"]["label"]]
