@@ -381,7 +381,7 @@ def mannWhitneyLongDf(stats_df, values_col,  labels_col, subset_col=None,
 
                 stats_dict[b]=(x[1], groupA_avg, groupB_avg)
             else:
-                print("Not enoughh values for stats on %s"%b)
+                print("Not enough values for stats on %s"%b)
                 
     pvals_df = pd.DataFrame.from_dict(stats_dict, orient="index")
     pvals_df.columns = ["pval", groupA_label+" "+ str(avg), groupB_label+" "+ str(avg)]
@@ -1422,7 +1422,8 @@ def meshIDToBranchDict(get_dict=True):
 ######################################################
 ### Plotting functions
 
-def plotCompletionYear(plots_df, colors, x_values="CompletionYear",xlabel="Completion Year", figsize=(8,5)):
+def plotCompletionYear(plots_df, colors, x_values="CompletionYear",
+    xlabel="Completion Year", figsize=(8,5), offset_labels=True):
     """
     Histplot of completion years
 
@@ -1440,8 +1441,15 @@ def plotCompletionYear(plots_df, colors, x_values="CompletionYear",xlabel="Compl
     ymin, ymax = ax.get_ylim()
     ax.vlines(x=2022.5, ymin=ymin, ymax=ymax, ls='--', lw=2, color="gray")
     ax.set_xlabel(xlabel)
-    ax.set_xticks(plots_df[x_values].sort_values().unique())
-    ax.set_xticklabels(plots_df[x_values].sort_values().unique())
+    if offset_labels:
+        labels = plots_df[x_values].sort_values().unique()
+        labels = [s if s%2==0 else np.nan for s in labels]
+        ax.set_xticks(labels)
+        ax.set_xticklabels(labels)
+
+    else:
+        ax.set_xticks(plots_df[x_values].sort_values().unique())
+        ax.set_xticklabels(plots_df[x_values].sort_values().unique())
     
     #if len(ax.containers)>1: ax.bar_label(ax.containers[1], color="steelblue")
     #ax.bar_label(ax.containers[0], color="orange")

@@ -34,7 +34,7 @@ def plotDatasetOverview():
     colors = {'Observational': "steelblue", 'Interventional': "orange"}
     with col1:
         if len(plots_df)>0:
-            fig = plotCompletionYear(plots_df, colors=colors)
+            fig = plotCompletionYear(plots_df, colors=colors, offset_labels=True)
             st.pyplot(fig)
 
         else: 
@@ -147,10 +147,11 @@ def plotEligibilityCriteria():
         run_button = st.button("Run")
 
     clinical_df = st.session_state.plot_values
-    all_stopwords = st.session_state.stopwords
-    _nlp = st.session_state.nlp
 
     if run_button:
+        all_stopwords = st.session_state.stopwords
+        _nlp = st.session_state.nlp
+
         st.write("Please be patient! This can take a minute to run")
 
         # Get values
@@ -216,7 +217,7 @@ def _loadSessionStateFilterElements(plots_df):
     # update plot_values
     st.session_state.plot_values = plots_df
 
-@st.cache_resource(show_spinner=False)
+@st.cache_data(show_spinner=False)
 def loadGlobalObjects():
     """
     Load session state values
@@ -294,7 +295,7 @@ def plotDashboard():
     _loadSessionStateFilterElements(clinical_df)
 
     # Plot number and duration of interventional vs observational studies
-    with st.expander("Dataset overview"): plotDatasetOverview()
+    with st.expander("Dataset overview", expanded=True): plotDatasetOverview()
 
     # Plot primary sponsor + collaborator class Sankey diagram & primary sponsor map
     with st.expander("Sponsor and collaborator metrics"): plotSponsorsAndLocations()
