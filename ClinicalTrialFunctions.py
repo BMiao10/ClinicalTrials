@@ -22,7 +22,7 @@ from scipy.stats import kruskal
 from scipy.stats import spearmanr
 import math
 import scipy
-from umap import UMAP
+import umap
 
 # nlp
 import spacy
@@ -673,7 +673,7 @@ def extractIndividualEligibility(bert_df, criteria_col="ExclusionCriteria", stop
 #@st.experimental_singleton
 def extractBERTopics(bert_df, _nlp=None, seed=None, nr_topics='auto', embeddings=None,
                      cache_embeddings=None, criteria_col = "ExclusionCriteriaEmbedClean", 
-                     class_col='conditionMeshMainBranch'):
+                     class_col='conditionMeshMainBranch', **kwargs):
     """
     Get topics using BERTopic run on spacy embeddings 
     https://arxiv.org/abs/2203.05794
@@ -690,7 +690,7 @@ def extractBERTopics(bert_df, _nlp=None, seed=None, nr_topics='auto', embeddings
         
     """
     # set seed for reproducibility
-    if seed is not None: umap_model = UMAP(random_state=seed)
+    if seed is not None: umap_model = umap.UMAP(random_state=seed,  **kwargs)
         
     # get docs and embeddings
     docs = bert_df[criteria_col]
