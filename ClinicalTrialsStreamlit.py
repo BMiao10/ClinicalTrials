@@ -73,7 +73,7 @@ def plotSponsorsAndLocations():
         fig = plotSponsorCollaborations(plots_df[["NCTId", "LeadSponsorClass", "PrimaryCollaboratorClass"]],
                                   collab_col="PrimaryCollaboratorClass", explode_collaborators=False,
                                   height=450, width=325, link_color_alpha=0.7)
-        fig.update_layout(paper_bgcolor='black')
+        fig.update_layout(paper_bgcolor='white')
         st.plotly_chart(fig)
 
     with col2:
@@ -123,7 +123,7 @@ def plotMeshBranchValues():
         try:
             stats_df = mannWhitneyLongDf(plots_df, values_col="EnrollmentCount", min_values=min_count,
                       labels_col="EnrollmentType",subset_col="conditionMeshMainBranch")
-            st.write(stats_df)
+            st.write("Actual vs Anticipated Enrolment")
 
             g, condition_df = plotCompareMeshGroupValues(plots_df[["EnrollmentCount", "conditionMeshMainBranch", "EnrollmentType"]], 
                 n_col=3, counts_col="EnrollmentCount", x_col="EnrollmentType",  mesh_col="conditionMeshMainBranch", min_len=min_count)
@@ -216,7 +216,7 @@ def _loadSessionStateFilterElements(plots_df):
     # update plot_values
     st.session_state.plot_values = plots_df
 
-@st.cache(show_spinner=False)
+@st.cache_resource(show_spinner=False)
 def loadGlobalObjects():
     """
     Load session state values
